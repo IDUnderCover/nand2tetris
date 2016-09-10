@@ -43,4 +43,37 @@ CHIP ALU {
 
     PARTS:
    // Put you code here:
+   /* if zx then x=0 */
+   Mux16(a=x,b=false,sel=zx,out=zerox);
+
+   /* if nx then x=!x */
+   Not16(in=zerox, out=notx);
+   Mux16(a=zerox,b=notx,sel=nx,out=negatex);
+
+   /* if zy then y=0 */
+   Mux16(a=y,b=false,sel=zy,out=zeroy);
+
+   /* if ny then y=!y */
+   Not16(in=zeroy, out=noty);
+   Mux16(a=zeroy,b=noty,sel=ny,out=negatey);
+
+   // compute out = x + y (if 1) or x & y (if 0)
+   Add16(a=negatex,b=negatey, out=sumxy);
+   And16(a=negatex,b=negatey, out=andxy);
+   Mux16(a=andxy,b=sumxy,sel=f, out=fxy);
+
+   // negate the out output?
+   Not16(in=fxy, out=notfxy);
+   Mux16(a=fxy,b=notfxy,sel=no,out=isout);
+
+
+   And16(a=true,b=isout,out[15]=isng);
+   Mux(a=false,b=true,sel=isng,out=ng);
+
+   Or16Way(in=isout,out=iszero);
+
+   Mux(a=true,b=false,sel=iszero,out=zr);
+
+   Or16(a=isout,b=false,out=out);
 }
+
